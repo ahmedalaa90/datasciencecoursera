@@ -1,32 +1,39 @@
-# read the R script
-# replace the "path/to/file" with the directory you save the file into
-# or you can read the file directly from the web
-source("path/to/file/assessment3.R")
+# Write the following functions:
+# makeCacheMatrix: This function creates a special "matrix" object
+# that can cache its inverse.
+# cacheSolve: This function computes the inverse of the special "matrix" 
+# returned by makeCacheMatrix above. If the inverse has already been 
+# calculated (and the matrix has not changed), then the cachesolve 
+# should retrieve the inverse from the cache.
 
-# create a *square* matrix (because `solve` only handles square matrices)
-# create the matrix during the call of makeCacheMatrix()
-a <- makeCacheMatrix( matrix(c(1,2,12,13), nrow = 2, ncol = 2) );
+## Put comments here that give an overall description of what your
+## functions do
 
-summary(a);
-#>              Length Class  Mode    
-#> setMatrix    1      -none- function
-#> getMatrix    1      -none- function
-#> cacheInverse 1      -none- function
-#> getInverse   1      -none- function
+# This function creates a special "matrix" object that can cache its inverse.
+makeCacheMatrix <- function(x = matrix()) {
+  inv <- NULL
+  set <- function(y) {
+    x <<- y
+    inv <<- NULL
+  }
+  get <- function() x
+  setinverse <- function(inverse) inv <<- inverse
+  getinverse <- function() inv
+  list(set=set, get=get, setinverse=setinverse, getinverse=getinverse)
+}
 
-a$getMatrix();
-#>      [,1] [,2]
-#> [1,]    1   12
-#> [2,]    2   13
 
-cacheSolve(a)
-#> [,1]        [,2]
-#> [1,] -1.1818182  1.09090909
-#> [2,]  0.1818182 -0.09090909
+# This function computes the inverse of the special "matrix" returned by 
+#makeCacheMatrix
 
-# the 2nd time we run the function,we get the cached value
-cacheSolve(a)
-#> getting cached data
-#> [,1]        [,2]
-#> [1,] -1.1818182  1.09090909
-#> [2,]  0.1818182 -0.09090909
+cacheSolve <- function(x, ...) {
+  inv <- x$getinverse()
+  if(!is.null(inv)) {
+    message("getting cached data.")
+    return(inv)
+  }
+  data <- x$get()
+  inv <- solve(data)
+  x$setinverse(inv)
+  inv
+}
